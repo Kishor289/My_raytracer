@@ -72,38 +72,78 @@ public:
                         
                         ray r = ray(disk_point, dir);
 
-                        double t_lowest_till = 100000;
-                        hittable* obj = NULL;
-                        hit_data h_d;
-                        hit_data h_d_front_obj;
-                        for(auto i = w.hittable_list.begin() ; i!=w.hittable_list.end(); ++i){
-                            
-                            if((*i)->ray_hit(r, h_d) == true){
-                                if(h_d.point_t < t_lowest_till){
-                                    t_lowest_till = h_d.point_t;
-                                    obj = &(**i);
-                                    h_d_front_obj = h_d;
-                                }
-                            }
+                        //takes a ray and world to give its hit_data
 
-                        }
+                        hit_data h_d_front_obj = w.hit(r);
+                        
+                        //fn end
 
-                        if(obj == NULL){
+
+                        if(h_d_front_obj.index == 0){
                             //sky
-                            double a = 0.5*r.direction().normalized().y()+1;
-                            c_f = c_f + color(1.0, 1.0, 1.0) * (1-a) + color(0.5, 0.7, 1.0) * a;
+                            //c_f = c_f + color(static_cast<double>(125)/255, static_cast<double>(187)/255, static_cast<double>(210)/255); //bg color
+                            double a = 0.5*r.direction().normalized().y()+0.5;
+                            if(a<=0.2){
+                                c_f = c_f + color(1, 1, 1);
+                            }
+                            else{
+                                a = 1.25f*(a-0.2); //0 to 0.8
+                                c_f = c_f + color(1.0, 1.0, 1.0) * (1-a) + color(static_cast<double>(22)/255, static_cast<double>(75)/255, static_cast<double>(118)/255) * a;
+                            }
                         }
                         else{
-                            //lighting code
                             
+                            //lighting 
+                            int max_bounce = 1000;
+                            //ray r_b = r;
+                            //color sky_color(1, 1, 1);
                             
+
+                            //run this in a loop and avg c_obs;
+                            int max_pass_per_pixel = 60;
+                            color c_obs_avg  = color(0, 0, 0);
+
+                            for(int passes =0; passes<max_pass_per_pixel; ++passes){
+                            color c_obs = h_d_front_obj.visible_final_color;
+                            //color inc_light = h_d_front_obj.mat.emission_c * h_d_front_obj.mat.emission_str;
+                            ray r_b = r;
+                            hit_data h_d_front_obj_c = h_d_front_obj;
+
+                            for(int count =0; count < max_bounce; ++count){
+                                r_b = ray(h_d_front_obj_c.point, rand_ray_bounce_dir(h_d_front_obj_c.normal));
+                                h_d_front_obj_c = w.hit(r_b);
+                                if(h_d_front_obj_c.index == 0){
+                                    //c_obs_avg = c_obs_avg + c_obs;
+                                    break;
+                                }
+
+                                else{
+                                    //c_obs = c_obs * 0.1;
+                                    //color emit_light = h_d_front_obj_c.mat.emission_c * h_d_front_obj_c.mat.emission_str;
+                                    //inc_light = inc_light + elm_multiply(emit_light, c_obs);
+                                    c_obs = elm_multiply(c_obs, h_d_front_obj_c.visible_final_color);
+
+                                }
+                                
+
+                            }
+
+                            c_obs_avg = c_obs_avg + c_obs;
+                            //c_obs_avg = c_obs_avg + inc_light;
+
+
+                            }
+                            c_obs_avg = c_obs_avg/max_pass_per_pixel;
+                            c_f = c_f + c_obs_avg;
 
                             //vec3 light = vec3(1, 0, 0).normalized();
                             //float a = 0.5*(h_d.normal * light)+0.5; 
                             //color c_ = vec3(1, 1, 1)*a + ((*obj).m.albedo)*(1-a);
-                            c_f = c_f + (*obj).m.albedo;
+                            //c_f = c_f + (*obj).m.albedo;
                             //c_f = c_f + c_;
                         }
+
+                        //c_f = c_f + c_obs_avg;
 
                     }
 

@@ -21,6 +21,7 @@ class vec3{
         //functions
         double length();
         vec3 normalized();
+        double dot(vec3 v);
 
         vec3 perp_to(vec3 v){
             double d = *this * v.normalized();
@@ -100,6 +101,14 @@ vec3 vec3::operator^(const vec3& v){
     return vec3(this->e[1] * v.e[2] - this->e[2] * v.e[1],
                 this->e[2] * v.e[0] - this->e[0] * v.e[2],
                 this->e[0] * v.e[1] - this->e[1] * v.e[0]);
+}
+
+vec3 elm_multiply(vec3 u, vec3 v){
+    return vec3(u.x()*v.x(), u.y()*v.y(), u.z()*v.z());
+}
+
+double vec3::dot(vec3 v){
+    return v.e[0] *this->e[0] + v.e[1] * this->e[1] + v.e[2] * this->e[2];
 }
 
 

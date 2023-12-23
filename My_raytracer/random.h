@@ -24,4 +24,15 @@ vec3 rand_disk_point(double r, vec3 x_, vec3 y_){
     //vec3 y_ = (x_ ^ norm).normalized();
     return x_ * (x*cos(y)) + y_ *(x*sin(y));
 }
+
+vec3 rand_ray_bounce_dir(vec3 n){
+    vec3 u;
+    u.e[0] = rand_no(0, 1);
+    u.e[1] = rand_no(0, 1);
+    u.e[2] = sqrt(1-u.e[0]*u.e[0] - u.e[1]*u.e[1]);
+    return n + u;
+}
+
+
+
 #endif
