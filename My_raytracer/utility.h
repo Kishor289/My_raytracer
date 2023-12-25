@@ -2,6 +2,7 @@
 #define UTILITY_H
 
 #include "vec3.h"
+//#include "color.h"
 
 bool interval(double p, double min_, double max_){
     if(p>=min_ && p<=max_){
@@ -54,7 +55,7 @@ vec3 clamp(vec3 p, double min_, double max_){
     return vec3(clamp(p.x(), min_, max_), clamp(p.y(), min_, max_), clamp(p.z(), min_, max_));
 }
 
-color checker_texture(double u, double v, int d, color c1, color c2){
+vec3 checker_texture(double u, double v, int d, vec3 c1, vec3 c2){
     
     int text_width = 400;
     int text_height = 800;
@@ -62,7 +63,7 @@ color checker_texture(double u, double v, int d, color c1, color c2){
     int u_ = static_cast<int>(u*text_width) % d;
     int v_ = static_cast<int>(v*text_height) % d;
 
-    color t_c;
+    vec3 t_c;
     
     //check psattern
     if(u_ < d/2 && v_< d/2){

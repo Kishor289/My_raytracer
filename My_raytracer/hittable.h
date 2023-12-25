@@ -8,6 +8,7 @@
 //#include "stb_image.h"
 #include "img_read.h"
 #include "utility.h"
+#include "color.h"
 
 class hittable{
 
@@ -62,10 +63,10 @@ public:
         double c = oc * oc - this->p_.params[0] * this->p_.params[0];
         double d = b_h*b_h - a*c;
 
-        if(d>=0){
+        if(d>=0.001f){
 
             double t_low = (-b_h - sqrt(d))/a;
-            if(t_low<0.001){
+            if(t_low<0.0001){
                 return false;
             }
 

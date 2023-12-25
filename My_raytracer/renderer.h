@@ -68,7 +68,7 @@ public:
 
                         vec3 disk_point = c.look_from + rand_disk_point(r_,delta_x.normalized(), delta_y.normalized());
 
-                        vec3 dir = pixel_00 + (delta_x*rand_no(0.995, 1.002))*i + (delta_y*rand_no(0.995, 1.002))*j - disk_point;
+                        vec3 dir = pixel_00 + (delta_x*rand_no(0.992, 1.008))*i + (delta_y*rand_no(0.992, 1.008))*j - disk_point;
                         
                         ray r = ray(disk_point, dir);
 
@@ -81,15 +81,10 @@ public:
 
                         if(h_d_front_obj.index == 0){
                             //sky
+                            //c_f = c_f + color(0, 0, 0);
                             //c_f = c_f + color(static_cast<double>(125)/255, static_cast<double>(187)/255, static_cast<double>(210)/255); //bg color
-                            double a = 0.5*r.direction().normalized().y()+0.5;
-                            if(a<=0.2){
-                                c_f = c_f + color(1, 1, 1);
-                            }
-                            else{
-                                a = 1.25f*(a-0.2); //0 to 0.8
-                                c_f = c_f + color(1.0, 1.0, 1.0) * (1-a) + color(static_cast<double>(22)/255, static_cast<double>(75)/255, static_cast<double>(118)/255) * a;
-                            }
+                            c_f = c_f + w.get_env_color(r);
+                            
                         }
                         else{
                             
@@ -100,39 +95,46 @@ public:
                             
 
                             //run this in a loop and avg c_obs;
-                            int max_pass_per_pixel = 60;
+                            int max_pass_per_pixel = 1200;
                             color c_obs_avg  = color(0, 0, 0);
 
                             for(int passes =0; passes<max_pass_per_pixel; ++passes){
-                            color c_obs = h_d_front_obj.visible_final_color;
-                            //color inc_light = h_d_front_obj.mat.emission_c * h_d_front_obj.mat.emission_str;
+                            //color c_obs = h_d_front_obj.visible_final_color;
+                            color ray_color = h_d_front_obj.visible_final_color; 
+                            color inc_light = h_d_front_obj.mat.emission_c * h_d_front_obj.mat.emission_str;
                             ray r_b = r;
                             hit_data h_d_front_obj_c = h_d_front_obj;
 
                             for(int count =0; count < max_bounce; ++count){
                                 r_b = ray(h_d_front_obj_c.point, rand_ray_bounce_dir(h_d_front_obj_c.normal));
                                 h_d_front_obj_c = w.hit(r_b);
+
                                 if(h_d_front_obj_c.index == 0){
                                     //c_obs_avg = c_obs_avg + c_obs;
+                                    inc_light = inc_light + elm_multiply(ray_color, w.get_env_color(r_b));
                                     break;
                                 }
 
                                 else{
+
+                                    ray_color = elm_multiply(ray_color, h_d_front_obj_c.visible_final_color);
+                                    inc_light = inc_light + h_d_front_obj_c.mat.emission_c * h_d_front_obj_c.mat.emission_str;
                                     //c_obs = c_obs * 0.1;
                                     //color emit_light = h_d_front_obj_c.mat.emission_c * h_d_front_obj_c.mat.emission_str;
                                     //inc_light = inc_light + elm_multiply(emit_light, c_obs);
-                                    c_obs = elm_multiply(c_obs, h_d_front_obj_c.visible_final_color);
+                                    // c_obs = elm_multiply(c_obs, h_d_front_obj_c.visible_final_color);
 
                                 }
                                 
 
                             }
-
-                            c_obs_avg = c_obs_avg + c_obs;
-                            //c_obs_avg = c_obs_avg + inc_light;
+                            c_obs_avg = c_obs_avg + inc_light;
+                            //c_obs_avg = c_obs_avg + c_obs;
+                            
 
 
                             }
+
                             c_obs_avg = c_obs_avg/max_pass_per_pixel;
                             c_f = c_f + c_obs_avg;
 
