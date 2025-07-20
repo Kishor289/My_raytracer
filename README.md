@@ -9,5 +9,5 @@ Here are some sample outputs from the raytracer:
 </p>
 
 <p align="center">
-  <img src="renders/4.png" alt="Render 4" width="800"/>
+  <img src="renders/5.png" alt="Render 4" width="800"/>
 </p>
